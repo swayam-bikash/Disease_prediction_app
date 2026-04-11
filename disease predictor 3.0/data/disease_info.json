@@ -1,0 +1,248 @@
+{
+  "AIDS": {
+    "description": "A chronic immune system disease caused by HIV.",
+    "causes": "HIV infection",
+    "precautions": "Safe sex, avoid needle sharing",
+    "medicines": "Antiretroviral therapy"
+  },
+  "Acne": {
+    "description": "A skin condition causing pimples and inflammation.",
+    "causes": "Excess oil, bacteria",
+    "precautions": "Keep skin clean, avoid oily products",
+    "medicines": "Topical creams, antibiotics"
+  },
+  "Alcoholic hepatitis": {
+    "description": "Liver inflammation due to excessive alcohol consumption.",
+    "causes": "Alcohol abuse",
+    "precautions": "Avoid alcohol",
+    "medicines": "Steroids, supportive care"
+  },
+  "Allergy": {
+    "description": "Immune response to allergens.",
+    "causes": "Dust, pollen, food",
+    "precautions": "Avoid triggers",
+    "medicines": "Antihistamines"
+  },
+  "Arthritis": {
+    "description": "Inflammation of joints.",
+    "causes": "Age, autoimmune issues",
+    "precautions": "Exercise, maintain weight",
+    "medicines": "Pain relievers, anti-inflammatory drugs"
+  },
+  "Bronchial Asthma": {
+    "description": "Respiratory condition with airway inflammation.",
+    "causes": "Allergens, pollution",
+    "precautions": "Avoid triggers",
+    "medicines": "Inhalers"
+  },
+  "Cervical spondylosis": {
+    "description": "Age-related wear of neck vertebrae.",
+    "causes": "Aging",
+    "precautions": "Good posture",
+    "medicines": "Pain relievers, physiotherapy"
+  },
+  "Chicken pox": {
+    "description": "Viral infection causing itchy rash.",
+    "causes": "Varicella-zoster virus",
+    "precautions": "Vaccination",
+    "medicines": "Antiviral drugs"
+  },
+  "Chronic cholestasis": {
+    "description": "Liver condition affecting bile flow.",
+    "causes": "Liver disease",
+    "precautions": "Healthy diet",
+    "medicines": "Bile acid therapy"
+  },
+  "Common Cold": {
+    "description": "Viral infection of upper respiratory tract.",
+    "causes": "Rhinovirus",
+    "precautions": "Hygiene, avoid contact",
+    "medicines": "Decongestants"
+  },
+  "Dengue": {
+    "description": "Mosquito-borne viral disease.",
+    "causes": "Aedes mosquito",
+    "precautions": "Avoid stagnant water",
+    "medicines": "Fluids, paracetamol"
+  },
+  "Diabetes": {
+    "description": "Chronic condition affecting blood sugar.",
+    "causes": "Insulin resistance",
+    "precautions": "Healthy diet, exercise",
+    "medicines": "Insulin, metformin"
+  },
+  "Dimorphic hemmorhoids(piles)": {
+    "description": "Swollen veins in rectum.",
+    "causes": "Constipation",
+    "precautions": "Fiber diet",
+    "medicines": "Creams, surgery"
+  },
+  "Drug Reaction": {
+    "description": "Adverse reaction to medication.",
+    "causes": "Drug sensitivity",
+    "precautions": "Avoid allergens",
+    "medicines": "Antihistamines"
+  },
+  "Fungal infection": {
+    "description": "Skin infection caused by fungi.",
+    "causes": "Moist environment",
+    "precautions": "Keep skin dry",
+    "medicines": "Antifungal creams"
+  },
+  "GERD": {
+    "description": "Acid reflux disease.",
+    "causes": "Weak lower esophageal sphincter",
+    "precautions": "Avoid spicy food",
+    "medicines": "Antacids"
+  },
+  "Gastroenteritis": {
+    "description": "Inflammation of stomach and intestines.",
+    "causes": "Infection",
+    "precautions": "Clean food",
+    "medicines": "ORS, hydration"
+  },
+  "Heart attack": {
+    "description": "Blocked blood flow to heart.",
+    "causes": "Coronary artery disease",
+    "precautions": "Healthy lifestyle",
+    "medicines": "Aspirin, surgery"
+  },
+  "Hepatitis B": {
+    "description": "Liver infection caused by HBV.",
+    "causes": "Virus",
+    "precautions": "Vaccination",
+    "medicines": "Antiviral drugs"
+  },
+  "Hepatitis C": {
+    "description": "Liver infection caused by HCV.",
+    "causes": "Virus",
+    "precautions": "Avoid infected blood",
+    "medicines": "Antivirals"
+  },
+  "Hepatitis D": {
+    "description": "Severe liver infection.",
+    "causes": "HDV virus",
+    "precautions": "Vaccination",
+    "medicines": "Antiviral therapy"
+  },
+  "Hepatitis E": {
+    "description": "Waterborne liver infection.",
+    "causes": "Contaminated water",
+    "precautions": "Clean water",
+    "medicines": "Supportive care"
+  },
+  "Hypertension": {
+    "description": "High blood pressure.",
+    "causes": "Lifestyle, genetics",
+    "precautions": "Exercise, low salt",
+    "medicines": "BP medications"
+  },
+  "Hyperthyroidism": {
+    "description": "Overactive thyroid.",
+    "causes": "Hormonal imbalance",
+    "precautions": "Regular checkups",
+    "medicines": "Anti-thyroid drugs"
+  },
+  "Hypoglycemia": {
+    "description": "Low blood sugar.",
+    "causes": "Diabetes medication",
+    "precautions": "Regular meals",
+    "medicines": "Glucose intake"
+  },
+  "Hypothyroidism": {
+    "description": "Underactive thyroid.",
+    "causes": "Hormone deficiency",
+    "precautions": "Balanced diet",
+    "medicines": "Thyroxine"
+  },
+  "Impetigo": {
+    "description": "Bacterial skin infection.",
+    "causes": "Bacteria",
+    "precautions": "Hygiene",
+    "medicines": "Antibiotics"
+  },
+  "Jaundice": {
+    "description": "Yellowing of skin due to liver issues.",
+    "causes": "Bilirubin buildup",
+    "precautions": "Healthy diet",
+    "medicines": "Treat underlying cause"
+  },
+  "Malaria": {
+    "description": "Mosquito-borne parasitic disease.",
+    "causes": "Plasmodium parasite",
+    "precautions": "Mosquito nets",
+    "medicines": "Antimalarial drugs"
+  },
+  "Migraine": {
+    "description": "Severe headache disorder.",
+    "causes": "Neurological triggers",
+    "precautions": "Avoid triggers",
+    "medicines": "Pain relievers"
+  },
+  "Osteoarthristis": {
+    "description": "Joint degeneration disease.",
+    "causes": "Wear and tear",
+    "precautions": "Exercise",
+    "medicines": "Painkillers"
+  },
+  "Paralysis (brain hemorrhage)": {
+    "description": "Loss of muscle function.",
+    "causes": "Brain stroke",
+    "precautions": "Control BP",
+    "medicines": "Rehabilitation"
+  },
+  "Peptic ulcer diseae": {
+    "description": "Sores in stomach lining.",
+    "causes": "H. pylori bacteria",
+    "precautions": "Avoid spicy food",
+    "medicines": "Antacids"
+  },
+  "Pneumonia": {
+    "description": "Lung infection.",
+    "causes": "Bacteria/virus",
+    "precautions": "Vaccination",
+    "medicines": "Antibiotics"
+  },
+  "Psoriasis": {
+    "description": "Chronic skin disease.",
+    "causes": "Autoimmune",
+    "precautions": "Moisturize skin",
+    "medicines": "Steroids"
+  },
+  "Tuberculosis": {
+    "description": "Bacterial lung infection.",
+    "causes": "Mycobacterium tuberculosis",
+    "precautions": "Avoid contact",
+    "medicines": "Antibiotics"
+  },
+  "Typhoid": {
+    "description": "Bacterial infection from contaminated food.",
+    "causes": "Salmonella bacteria",
+    "precautions": "Clean water",
+    "medicines": "Antibiotics"
+  },
+  "Urinary tract infection": {
+    "description": "Infection in urinary system.",
+    "causes": "Bacteria",
+    "precautions": "Hydration",
+    "medicines": "Antibiotics"
+  },
+  "Varicose veins": {
+    "description": "Enlarged veins.",
+    "causes": "Poor circulation",
+    "precautions": "Exercise",
+    "medicines": "Compression therapy"
+  },
+  "Hepatitis A": {
+    "description": "Liver infection caused by HAV.",
+    "causes": "Contaminated food",
+    "precautions": "Vaccination",
+    "medicines": "Supportive care"
+  },
+  "(vertigo) Paroymsal  Positional Vertigo": {
+    "description": "Inner ear disorder causing dizziness.",
+    "causes": "Inner ear problems",
+    "precautions": "Avoid sudden movements",
+    "medicines": "Vestibular therapy"
+  }
+}

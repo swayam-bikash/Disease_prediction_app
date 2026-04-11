@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prediction History</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="navbar" style="display:flex; justify-content:space-between; align-items:center; padding:15px 30px;">
+    <span>🩺 AI Disease Prediction System</span>
+    <div style="display:flex; align-items:center; gap:15px;">
+        <span style="font-size:14px; opacity:0.9;">👤 {{ username }}</span>
+        <a href="/" style="color:white; text-decoration:none; font-size:14px; background:rgba(255,255,255,0.2); padding:6px 14px; border-radius:20px;">🏠 Home</a>
+        <a href="/logout" style="color:white; text-decoration:none; font-size:14px; background:rgba(255,77,77,0.5); padding:6px 14px; border-radius:20px;">Logout</a>
+    </div>
+</div>
+
+<div class="main-card">
+
+    <h1>📋 Prediction History</h1>
+    <p class="subtitle">Your past disease predictions</p>
+
+    {% if records %}
+    <table style="width:100%; border-collapse:collapse; margin-top:20px;">
+        <thead>
+            <tr style="background:rgba(255,255,255,0.2);">
+                <th style="padding:12px; text-align:left;">#</th>
+                <th style="padding:12px; text-align:left;">Disease</th>
+                <th style="padding:12px; text-align:left;">Confidence</th>
+                <th style="padding:12px; text-align:left;">Symptoms</th>
+                <th style="padding:12px; text-align:left;">Date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in records %}
+            <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+                <td style="padding:12px;">{{ loop.index }}</td>
+                <td style="padding:12px; color:#42a5f5; font-weight:bold;">{{ record[0] }}</td>
+                <td style="padding:12px;">{{ record[1] }}%</td>
+                <td style="padding:12px; font-size:13px; opacity:0.85;">{{ record[2] }}</td>
+                <td style="padding:12px; font-size:13px; opacity:0.75;">{{ record[3] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    {% else %}
+    <p style="text-align:center; margin-top:30px; opacity:0.7;">No predictions yet. Go check your symptoms!</p>
+    {% endif %}
+
+</div>
+
+<footer>
+    <p>AI-based Medical Assistance | For Educational Use Only</p>
+</footer>
+
+</body>
+</html>

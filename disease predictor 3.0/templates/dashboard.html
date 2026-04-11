@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+
+    <!-- chart js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- font -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="navbar">
+    📊 System Dashboard
+</div>
+
+
+<!-- MAIN CARD -->
+<div class="main-card">
+
+    <h1>Project Insights</h1>
+    <p class="subtitle">Basic statistics of dataset and system</p>
+
+    <!-- STATS -->
+    <div class="stats-container">
+
+        <div class="stat-box">
+            <h2>{{ total_symptoms }}</h2>
+            <p>Total Symptoms</p>
+        </div>
+
+        <div class="stat-box">
+            <h2>{{ total_diseases }}</h2>
+            <p>Total Diseases</p>
+        </div>
+
+    </div>
+
+
+    <!-- CHART -->
+    <div style="margin-top: 40px;">
+        <h2 style="text-align:center;">Model Comparison (Example)</h2>
+
+        <canvas id="modelChart"></canvas>
+    </div>
+
+</div>
+
+
+<!-- BACK BUTTON -->
+<div style="text-align:center; margin-top: 20px;">
+    <a href="/" class="fancy-btn">⬅ Back to Home</a>
+</div>
+
+
+<!-- SCRIPT -->
+<script>
+
+// dummy data for now (can connect later)
+let labels = ["Random Forest", "Naive Bayes", "Gradient Boosting"];
+
+let data = {
+    labels: labels,
+    datasets: [{
+        label: "Accuracy",
+        data: [0.95, 0.88, 0.92],   // example values
+        borderWidth: 1
+    }]
+};
+
+// chart config
+let config = {
+    type: 'bar',
+    data: data,
+    options: {
+        scales: {
+            y: {
+                beginAtZero: true
+            }
+        }
+    }
+};
+
+// render chart
+let ctx = document.getElementById('modelChart').getContext('2d');
+new Chart(ctx, config);
+
+</script>
+
+</body>
+</html>
