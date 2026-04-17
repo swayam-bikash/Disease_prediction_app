@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>History</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #000; overflow: hidden; width: 100vw; height: 100vh; }
+        video {
+            width: 100vw;
+            height: 100vh;
+            object-fit: cover;
+            display: block;
+        }
+        .skip-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            padding: 10px 22px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 13px;
+            font-family: 'Poppins', sans-serif;
+            border-radius: 25px;
+            cursor: pointer;
+            backdrop-filter: blur(8px);
+            transition: background 0.2s;
+            z-index: 10;
+        }
+        .skip-btn:hover { background: rgba(255,255,255,0.25); }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <video id="historyIntroVideo" autoplay playsinline>
+        <source src="{{ url_for('static', filename='a3.mp4') }}" type="video/mp4">
+    </video>
+    <button class="skip-btn" onclick="goHistory()">Skip ›</button>
+
+    <script>
+        function goHistory() {
+            window.location.href = "/history";
+        }
+        document.getElementById("historyIntroVideo").addEventListener("ended", goHistory);
+    </script>
+</body>
+</html>

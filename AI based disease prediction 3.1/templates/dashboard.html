@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        (function() {
+            var t = localStorage.getItem("theme") || "dark";
+            document.documentElement.setAttribute("data-theme", t);
+        })();
+    </script>
+</head>
+<body class="page-default">
+
+<nav class="navbar">
+    <span class="navbar-brand">📊 Dashboard</span>
+    <div class="navbar-links">
+        <a href="/" class="nav-link">🏠 Home</a>
+        <a href="/history_intro" class="nav-link">📋 History</a>
+        <a href="/profile" class="nav-link">👤 Profile</a>
+        {% if is_admin %}<a href="/admin" class="nav-link" style="background:rgba(251,191,36,0.15);border-color:rgba(251,191,36,0.4);color:#fbbf24;">🔑 Admin</a>{% endif %}
+        <button id="themeToggle" class="theme-toggle-btn" title="Toggle theme">🌙</button>
+    </div>
+</nav>
+
+<div class="main-card">
+    <p class="card-title">System Overview</p>
+    <p class="card-subtitle">Dataset, model and user statistics</p>
+
+    <div class="stats-grid">
+        <div class="stat-box">
+            <div class="stat-number">{{ total_symptoms }}</div>
+            <div class="stat-label">Total Symptoms</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ total_diseases }}</div>
+            <div class="stat-label">Total Diseases</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">3</div>
+            <div class="stat-label">Models Trained</div>
+        </div>
+        <div class="stat-box">
+            <div class="stat-number">{{ user_total }}</div>
+            <div class="stat-label">Your Predictions</div>
+        </div>
+    </div>
+
+    <hr class="divider">
+
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; flex-wrap: wrap;">
+
+        <div>
+            <p class="section-heading" style="text-align:center;">Model Accuracy Comparison</p>
+            <canvas id="modelChart"></canvas>
+        </div>
+
+        <div>
+            <p class="section-heading" style="text-align:center;">Most Predicted Diseases</p>
+            {% if top_diseases %}
+            <canvas id="diseaseChart"></canvas>
+            {% else %}
+            <p style="text-align:center; opacity:0.5; margin-top:40px;">No predictions yet</p>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+<div class="main-card" style="margin-top: 0; margin-bottom: 0;">
+    <p class="section-heading" style="text-align:center;">Most Common Symptoms</p>
+    {% if top_symptoms | length >= 2 %}
+    <canvas id="symptomsChart" style="max-height:320px;"></canvas>
+    {% else %}
+    <p style="text-align:center; opacity:0.5; margin: 30px 0;">Not enough data</p>
+    {% endif %}
+</div>
+
+<div style="text-align: center; margin: 10px 0 40px;">
+    <a href="/" class="fancy-btn">⬅ Back to Home</a>
+</div>
+
+<footer><p>AI-based Medical Assistance · For Educational Use Only · <a href="/contact" style="color:rgba(255,255,255,0.5);">Contact Us</a></p></footer>
+
+<script>
+new Chart(document.getElementById('modelChart').getContext('2d'), {
+    type: 'bar',
+    data: {
+        labels: ["Random Forest", "Naive Bayes", "Gradient Boosting"],
+        datasets: [{
+            label: "Accuracy",
+            data: [0.95, 0.88, 0.92],
+            backgroundColor: ["rgba(66,165,245,0.6)", "rgba(126,87,194,0.6)", "rgba(255,64,129,0.6)"],
+            borderColor: ["#42a5f5", "#7e57c2", "#ff4081"],
+            borderWidth: 2,
+            borderRadius: 8
+        }]
+    },
+    options: {
+        plugins: { legend: { labels: { color: "rgba(255,255,255,0.7)" } } },
+        scales: {
+            x: { ticks: { color: "rgba(255,255,255,0.7)" }, grid: { color: "rgba(255,255,255,0.06)" } },
+            y: { beginAtZero: true, max: 1, ticks: { color: "rgba(255,255,255,0.7)" }, grid: { color: "rgba(255,255,255,0.06)" } }
+        }
+    }
+});
+
+{% if top_diseases %}
+new Chart(document.getElementById('diseaseChart').getContext('2d'), {
+    type: 'doughnut',
+    data: {
+        labels: [{% for d in top_diseases %}"{{ d[0] }}"{% if not loop.last %},{% endif %}{% endfor %}],
+        datasets: [{
+            data: [{% for d in top_diseases %}{{ d[1] }}{% if not loop.last %},{% endif %}{% endfor %}],
+            backgroundColor: ["#42a5f5","#7e57c2","#ff4081","#00e676","#ff7043"],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        plugins: {
+            legend: { labels: { color: "rgba(255,255,255,0.75)", font: { size: 12 } } }
+        }
+    }
+});
+{% endif %}
+</script>
+
+<script>
+(function() {
+    var btn = document.getElementById("themeToggle");
+    function applyTheme(t) {
+        document.documentElement.setAttribute("data-theme", t);
+        document.body.setAttribute("data-theme", t);
+        btn.textContent = t === "light" ? "🌙" : "☀️";
+    }
+    applyTheme(localStorage.getItem("theme") || "dark");
+    btn.addEventListener("click", function() {
+        var next = (localStorage.getItem("theme") || "dark") === "dark" ? "light" : "dark";
+        localStorage.setItem("theme", next);
+        applyTheme(next);
+    });
+})();
+</script>
+
+{% if top_symptoms | length >= 2 %}
+<script>
+(function() {
+    var raw = {{ top_symptoms | tojson }};
+    var labels = raw.map(function(d) { return d[0].replace(/_/g, ' '); });
+    var counts = raw.map(function(d) { return d[1]; });
+    new Chart(document.getElementById('symptomsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Frequency',
+                data: counts,
+                backgroundColor: 'rgba(126,87,194,0.6)',
+                borderColor: '#7e57c2',
+                borderWidth: 2,
+                borderRadius: 6
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: { legend: { labels: { color: 'rgba(255,255,255,0.7)' } } },
+            scales: {
+                x: { beginAtZero: true, ticks: { color: 'rgba(255,255,255,0.7)', stepSize: 1 }, grid: { color: 'rgba(255,255,255,0.06)' } },
+                y: { ticks: { color: 'rgba(255,255,255,0.7)' }, grid: { color: 'rgba(255,255,255,0.06)' } }
+            }
+        }
+    });
+})();
+</script>
+{% endif %}
+
+</body>
+</html>

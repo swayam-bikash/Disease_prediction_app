@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Prescription Result</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&family=Special+Elite&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script>
+        (function() {
+            var t = localStorage.getItem("theme") || "dark";
+            document.documentElement.setAttribute("data-theme", t);
+        })();
+    </script>
+</head>
+<body class="page-default">
+
+<nav class="navbar">
+    <span class="navbar-brand">🩺 AI Disease Prediction</span>
+    <div class="navbar-links">
+        <span class="nav-user">👤 {{ username }}</span>
+        <a href="/history_intro" class="nav-link">📋 History</a>
+        <a href="/profile" class="nav-link">👤 Profile</a>
+        <a href="/logout" class="nav-link danger">Logout</a>
+        <button id="themeToggle" class="theme-toggle-btn" title="Toggle theme">🌙</button>
+    </div>
+</nav>
+
+<!-- PRESCRIPTION CARD -->
+<div class="rx-wrapper">
+<div class="rx-card">
+
+    <!-- HEADER -->
+    <div class="rx-header">
+        <div class="rx-header-left">
+            <div class="rx-clinic-name">MediBot AI Clinic</div>
+            <div class="rx-clinic-sub">AI-Powered Diagnostic Assistant</div>
+        </div>
+        <div class="rx-header-right">
+            <div class="rx-date">Date: {{ import_date if import_date else '' }}
+                <script>document.write(new Date().toLocaleDateString('en-GB', {day:'2-digit',month:'short',year:'numeric'}))</script>
+            </div>
+            <div class="rx-id">Ref: #{{ range(10000,99999)|random }}</div>
+        </div>
+    </div>
+
+    <div class="rx-divider-thick"></div>
+
+    <!-- PATIENT INFO -->
+    <div class="rx-patient-row">
+        <div class="rx-patient-field">
+            <span class="rx-field-label">Patient</span>
+            <span class="rx-field-value">{{ username }}</span>
+        </div>
+        <div class="rx-patient-field">
+            <span class="rx-field-label">Confidence</span>
+            <span class="rx-field-value rx-confidence">{{ confidence }}%</span>
+        </div>
+        <div class="rx-patient-field">
+            <span class="rx-field-label">Symptoms Reported</span>
+            <span class="rx-field-value">{{ symptoms|length }}</span>
+        </div>
+    </div>
+
+    <div class="rx-divider"></div>
+
+    <!-- Rx SYMBOL + DIAGNOSIS -->
+    <div class="rx-diagnosis-row">
+        <div class="rx-symbol">℞</div>
+        <div class="rx-diagnosis-content">
+            <div class="rx-diagnosis-label">Predicted Diagnosis</div>
+            <div class="rx-diagnosis-name">{{ disease }}</div>
+            <div class="rx-conf-bar-wrap">
+                <div class="rx-conf-bar-fill" id="confBar" style="width:0%;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="rx-divider"></div>
+
+    <!-- TOP 3 PREDICTIONS -->
+    {% if top3 %}
+    <div class="rx-section">
+        <div class="rx-section-title">📊 Top 3 Differential Diagnoses</div>
+        <div class="rx-top3">
+            {% for item in top3 %}
+            <div class="rx-top3-row">
+                <span class="rx-top3-rank">{{ loop.index }}</span>
+                <span class="rx-top3-name">{{ item.disease }}</span>
+                <div class="rx-top3-bar-wrap">
+                    <div class="rx-top3-bar" style="width: {{ item.confidence }}%;"></div>
+                </div>
+                <span class="rx-top3-pct">{{ item.confidence }}%</span>
+                {% if loop.index > 1 %}
+                <button class="compare-btn" onclick="compareDisease('{{ disease }}', '{{ item.disease }}', diseaseInfoMap)">⚖️ Compare</button>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    <div class="rx-divider"></div>
+    {% endif %}
+
+    <!-- SYMPTOMS -->
+    <div class="rx-section">
+        <div class="rx-section-title">Chief Complaints</div>
+        <div class="rx-tags">
+            {% for symptom in symptoms %}
+            <span class="rx-tag">
+                {{ symptom.replace('_', ' ').title() }}
+                {% if severity_data and symptom in severity_data %}
+                    {% set sev = severity_data[symptom] %}
+                    <span class="sev-badge sev-{{ sev }}">{{ sev }}</span>
+                {% endif %}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="rx-divider"></div>
+
+    <!-- DESCRIPTION + CAUSES -->
+    <div class="rx-two-col">
+        <div class="rx-section">
+            <div class="rx-section-title">📖 About this Condition</div>
+            <p class="rx-text">{{ info.description }}</p>
+        </div>
+        <div class="rx-section">
+            <div class="rx-section-title">⚠️ Possible Causes</div>
+            <p class="rx-text">{{ info.causes }}</p>
+        </div>
+    </div>
+
+    <div class="rx-divider"></div>
+
+    <!-- PRECAUTIONS + MEDICINES -->
+    <div class="rx-two-col">
+        <div class="rx-section">
+            <div class="rx-section-title">🛡️ Precautions</div>
+            <p class="rx-text">{{ info.precautions }}</p>
+        </div>
+        <div class="rx-section rx-medicine-box">
+            <div class="rx-section-title">💊 Suggested Medicines</div>
+            <p class="rx-text">{{ info.medicines }}</p>
+        </div>
+    </div>
+
+    <div class="rx-divider"></div>
+
+    <!-- MOTIVATION -->
+    <div class="rx-motivation">
+        {{ motivation }}
+    </div>
+
+    <!-- FOOTER -->
+    <div class="rx-footer">
+        <div class="rx-footer-left">
+            <div class="rx-sig-line"></div>
+            <div class="rx-sig-label">MediBot AI · Digital Signature</div>
+        </div>
+        <div class="rx-footer-right">
+            <div class="rx-disclaimer">
+                ⚠️ This is an AI-generated prediction only. Not a substitute for professional medical advice. Always consult a licensed doctor.
+            </div>
+        </div>
+    </div>
+
+</div><!-- end rx-card -->
+
+<!-- ACTIONS -->
+<div class="result-actions">
+    <a href="/" class="fancy-btn">⬅ New Prediction</a>
+    <a href="/history_intro" class="fancy-btn" style="background: linear-gradient(135deg,#7e57c2,#42a5f5);">📋 History</a>
+    <button onclick="window.print()" class="fancy-btn" style="background: linear-gradient(135deg,#00897b,#00e676); border:none; cursor:pointer; font-family:Poppins,sans-serif;">🖨️ Print</button>
+    <button onclick="generatePDF()" class="fancy-btn" style="background: linear-gradient(135deg,#e53935,#ff7043); border:none; cursor:pointer; font-family:Poppins,sans-serif;">📄 Download PDF</button>
+    <button id="bookmarkBtn" onclick="toggleBookmark()" class="fancy-btn" style="background: linear-gradient(135deg,#f59e0b,#fbbf24); border:none; cursor:pointer; font-family:Poppins,sans-serif;">{{ '⭐ Bookmarked' if bookmarked else '🔖 Bookmark' }}</button>
+    <div style="position:relative;display:inline-block;">
+        <button onclick="toggleShareMenu()" class="fancy-btn" style="background: linear-gradient(135deg,#0284c7,#38bdf8); border:none; cursor:pointer; font-family:Poppins,sans-serif;">🔗 Share</button>
+        <div id="shareDropdown" style="display:none;position:absolute;bottom:110%;left:0;background:rgba(10,30,80,0.95);border:1px solid rgba(100,180,255,0.3);border-radius:10px;padding:8px;min-width:170px;z-index:100;">
+            <button onclick="saveAsImage()" style="display:block;width:100%;background:none;border:none;color:#bfdbfe;padding:8px 12px;cursor:pointer;font-family:Poppins,sans-serif;font-size:13px;text-align:left;border-radius:6px;" onmouseover="this.style.background='rgba(100,180,255,0.15)'" onmouseout="this.style.background='none'">📸 Save as Image</button>
+            <button onclick="copyShareLink()" style="display:block;width:100%;background:none;border:none;color:#bfdbfe;padding:8px 12px;cursor:pointer;font-family:Poppins,sans-serif;font-size:13px;text-align:left;border-radius:6px;" onmouseover="this.style.background='rgba(100,180,255,0.15)'" onmouseout="this.style.background='none'">🔗 Copy Link</button>
+        </div>
+    </div>
+    <button onclick="openHospitalModal()" class="fancy-btn" style="background: linear-gradient(135deg,#16a34a,#4ade80); border:none; cursor:pointer; font-family:Poppins,sans-serif;">🏥 Find Hospitals</button>
+    <span id="pdfError" style="color:#f87171;font-size:12px;display:none;margin-left:8px;"></span>
+</div>
+
+</div><!-- end rx-wrapper -->
+
+<!-- TOAST -->
+<div id="toast" style="display:none;position:fixed;bottom:30px;left:50%;transform:translateX(-50%);background:rgba(16,185,129,0.95);color:#fff;padding:10px 24px;border-radius:20px;font-size:14px;font-family:Poppins,sans-serif;z-index:9999;box-shadow:0 4px 20px rgba(0,0,0,0.3);">Link copied!</div>
+
+<!-- HOSPITAL MODAL -->
+<div id="hospitalModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+    <div style="background:rgba(10,30,80,0.97);border:1px solid rgba(100,180,255,0.3);border-radius:16px;padding:28px;max-width:680px;width:90%;max-height:80vh;overflow-y:auto;position:relative;">
+        <button onclick="closeHospitalModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;color:#f87171;font-size:20px;cursor:pointer;">✕</button>
+        <h3 style="color:#bfdbfe;margin-bottom:16px;font-family:Poppins,sans-serif;">🏥 Nearby Hospitals</h3>
+        <div id="hospitalContent">
+            <p style="color:#93c5fd;font-family:Poppins,sans-serif;font-size:14px;">Requesting your location...</p>
+        </div>
+    </div>
+</div>
+
+<footer><p>AI-based Medical Assistance · For Educational Use Only · <a href="/contact" style="color:rgba(255,255,255,0.5);">Contact Us</a></p></footer>
+
+<script>
+// ---- Data from Flask ----
+var PREDICTION_ID = {{ prediction_id }};
+var SHARE_TOKEN = "{{ share_token }}";
+var MAPS_API_KEY = "{{ maps_api_key }}";
+var PRIMARY_DISEASE = {{ disease | tojson }};
+var diseaseInfoMap = {{ disease_info_json | safe }};
+var IS_BOOKMARKED = {{ 1 if bookmarked else 0 }};
+
+// ---- Confidence animation ----
+function animateConfidence(value, elementId) {
+    var el = document.getElementById(elementId);
+    if (!el) return;
+    el.classList.remove("conf-green", "conf-amber", "conf-red");
+    if (value >= 75) el.classList.add("conf-green");
+    else if (value >= 40) el.classList.add("conf-amber");
+    else el.classList.add("conf-red");
+    el.style.width = "0%";
+    var start = null;
+    function step(timestamp) {
+        if (!start) start = timestamp;
+        var progress = Math.min((timestamp - start) / 1000, 1);
+        el.style.width = (progress * value) + "%";
+        if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+}
+
+window.addEventListener("load", function() {
+    setTimeout(function() { animateConfidence({{ confidence }}, "confBar"); }, 400);
+});
+
+// ---- Theme toggle ----
+(function() {
+    var btn = document.getElementById("themeToggle");
+    function applyTheme(t) {
+        document.documentElement.setAttribute("data-theme", t);
+        document.body.setAttribute("data-theme", t);
+        btn.textContent = t === "light" ? "🌙" : "☀️";
+    }
+    applyTheme(localStorage.getItem("theme") || "dark");
+    btn.addEventListener("click", function() {
+        var next = (localStorage.getItem("theme") || "dark") === "dark" ? "light" : "dark";
+        localStorage.setItem("theme", next);
+        applyTheme(next);
+    });
+})();
+
+// ---- PDF Download ----
+function generatePDF() {
+    try {
+        var { jsPDF } = window.jspdf;
+        var doc = new jsPDF({ unit: "mm", format: "a4" });
+        var disease = {{ disease | tojson }};
+        var confidence = {{ confidence }};
+        var symptoms = {{ symptoms | tojson }};
+        var description = {{ info.description | tojson }};
+        var precautions = {{ info.precautions | tojson }};
+        var medicines = {{ info.medicines | tojson }};
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(18);
+        doc.text("MediBot AI Clinic - Prescription", 20, 20);
+
+        doc.setFont("helvetica", "normal");
+        doc.setFontSize(11);
+        doc.text("Date: " + new Date().toLocaleDateString(), 20, 30);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(13);
+        doc.text("Diagnosis: " + disease, 20, 42);
+        doc.text("Confidence: " + confidence + "%", 20, 50);
+
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(11);
+        doc.text("Symptoms:", 20, 62);
+        doc.setFont("helvetica", "normal");
+        var sympStr = symptoms.map(function(s){ return s.replace(/_/g," "); }).join(", ");
+        var sympLines = doc.splitTextToSize(sympStr, 170);
+        doc.text(sympLines, 20, 70);
+
+        var y = 70 + sympLines.length * 6 + 6;
+
+        doc.setFont("helvetica", "bold");
+        doc.text("Description:", 20, y); y += 7;
+        doc.setFont("helvetica", "normal");
+        var descLines = doc.splitTextToSize(description, 170);
+        doc.text(descLines, 20, y); y += descLines.length * 6 + 6;
+
+        doc.setFont("helvetica", "bold");
+        doc.text("Precautions:", 20, y); y += 7;
+        doc.setFont("helvetica", "normal");
+        var precLines = doc.splitTextToSize(precautions, 170);
+        doc.text(precLines, 20, y); y += precLines.length * 6 + 6;
+
+        doc.setFont("helvetica", "bold");
+        doc.text("Medicines:", 20, y); y += 7;
+        doc.setFont("helvetica", "normal");
+        var medLines = doc.splitTextToSize(medicines, 170);
+        doc.text(medLines, 20, y);
+
+        var dateStr = new Date().toISOString().slice(0,10);
+        var filename = "prescription_" + disease.replace(/\s+/g,"_") + "_" + dateStr + ".pdf";
+        doc.save(filename);
+    } catch(e) {
+        var errEl = document.getElementById("pdfError");
+        errEl.textContent = "PDF generation failed: " + e.message;
+        errEl.style.display = "inline";
+        setTimeout(function(){ errEl.style.display = "none"; }, 4000);
+    }
+}
+
+// ---- Bookmark ----
+function toggleBookmark() {
+    fetch("/bookmark/" + PREDICTION_ID, { method: "POST" })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+            IS_BOOKMARKED = data.bookmarked;
+            document.getElementById("bookmarkBtn").textContent = data.bookmarked ? "⭐ Bookmarked" : "🔖 Bookmark";
+        })
+        .catch(function(){ alert("Bookmark failed. Please try again."); });
+}
+
+// ---- Share dropdown ----
+function toggleShareMenu() {
+    var dd = document.getElementById("shareDropdown");
+    dd.style.display = dd.style.display === "none" ? "block" : "none";
+}
+document.addEventListener("click", function(e) {
+    var dd = document.getElementById("shareDropdown");
+    if (dd && !dd.contains(e.target) && !e.target.closest || (e.target.closest && !e.target.closest("[onclick='toggleShareMenu()']"))) {
+        // close if click outside
+        if (!e.target.textContent.includes("Share")) dd.style.display = "none";
+    }
+});
+
+function saveAsImage() {
+    document.getElementById("shareDropdown").style.display = "none";
+    var card = document.querySelector(".rx-card");
+    html2canvas(card, { scale: 2, useCORS: true }).then(function(canvas) {
+        var link = document.createElement("a");
+        var disease = {{ disease | tojson }};
+        var dateStr = new Date().toISOString().slice(0,10);
+        link.download = "result_" + disease.replace(/\s+/g,"_") + "_" + dateStr + ".png";
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    });
+}
+
+function copyShareLink() {
+    document.getElementById("shareDropdown").style.display = "none";
+    var link = window.location.origin + "/share/" + SHARE_TOKEN;
+    navigator.clipboard.writeText(link).then(function() {
+        showToast("Link copied!");
+    }).catch(function() {
+        prompt("Copy this link:", link);
+    });
+}
+
+function showToast(msg) {
+    var t = document.getElementById("toast");
+    t.textContent = msg;
+    t.style.display = "block";
+    setTimeout(function(){ t.style.display = "none"; }, 2500);
+}
+
+// ---- Compare ----
+function compareDisease(primary, compare, infoMap) {
+    var existing = document.getElementById("comparePanel");
+    if (existing) existing.remove();
+
+    var pInfo = infoMap[primary] || {};
+    var cInfo = infoMap[compare] || {};
+
+    function field(label, pVal, cVal) {
+        var pText = pVal || "Information not available";
+        var cText = cVal || "Information not available";
+        var diff = pText !== cText;
+        return '<tr>' +
+            '<td style="font-weight:600;color:#93c5fd;padding:8px 10px;vertical-align:top;white-space:nowrap;">' + label + '</td>' +
+            '<td class="' + (diff ? 'diff-highlight' : '') + '" style="padding:8px 10px;vertical-align:top;">' + pText + '</td>' +
+            '<td class="' + (diff ? 'diff-highlight' : '') + '" style="padding:8px 10px;vertical-align:top;">' + cText + '</td>' +
+        '</tr>';
+    }
+
+    var panel = document.createElement("div");
+    panel.id = "comparePanel";
+    panel.innerHTML =
+        '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;">' +
+            '<h3 style="color:#bfdbfe;font-family:Poppins,sans-serif;font-size:16px;">⚖️ Disease Comparison</h3>' +
+            '<button onclick="document.getElementById(\'comparePanel\').remove()" style="background:none;border:none;color:#f87171;font-size:18px;cursor:pointer;">✕</button>' +
+        '</div>' +
+        '<table style="width:100%;border-collapse:collapse;font-size:13px;font-family:Poppins,sans-serif;">' +
+            '<thead><tr>' +
+                '<th style="padding:8px 10px;color:rgba(150,210,255,0.6);text-align:left;border-bottom:1px solid rgba(100,180,255,0.2);"></th>' +
+                '<th style="padding:8px 10px;color:#7dd3fc;text-align:left;border-bottom:1px solid rgba(100,180,255,0.2);">' + primary + '</th>' +
+                '<th style="padding:8px 10px;color:#fbbf24;text-align:left;border-bottom:1px solid rgba(100,180,255,0.2);">' + compare + '</th>' +
+            '</tr></thead>' +
+            '<tbody>' +
+                field("Description", pInfo.description, cInfo.description) +
+                field("Causes", pInfo.causes, cInfo.causes) +
+                field("Precautions", pInfo.precautions, cInfo.precautions) +
+                field("Medicines", pInfo.medicines, cInfo.medicines) +
+            '</tbody>' +
+        '</table>';
+
+    var wrapper = document.querySelector(".rx-wrapper");
+    wrapper.appendChild(panel);
+    panel.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+// ---- Hospital Finder ----
+function openHospitalModal() {
+    var modal = document.getElementById("hospitalModal");
+    modal.style.display = "flex";
+    var content = document.getElementById("hospitalContent");
+
+    if (!navigator.geolocation) {
+        showHospitalFallback(content);
+        return;
+    }
+
+    content.innerHTML = '<p style="color:#93c5fd;font-family:Poppins,sans-serif;font-size:14px;">📍 Getting your location...</p>';
+
+    navigator.geolocation.getCurrentPosition(
+        function(pos) {
+            var lat = pos.coords.latitude;
+            var lng = pos.coords.longitude;
+            if (MAPS_API_KEY) {
+                var query = encodeURIComponent("hospitals near me");
+                var src = "https://www.google.com/maps/embed/v1/search?key=" + MAPS_API_KEY +
+                    "&q=" + query + "&center=" + lat + "," + lng + "&zoom=13";
+                content.innerHTML = '<iframe width="100%" height="380" style="border:0;border-radius:10px;" loading="lazy" allowfullscreen src="' + src + '"></iframe>';
+            } else {
+                var mapsUrl = "https://www.google.com/maps/search/hospitals/@" + lat + "," + lng + ",14z";
+                content.innerHTML = '<p style="color:#93c5fd;font-family:Poppins,sans-serif;font-size:14px;">Location found. No Maps API key configured.</p>' +
+                    '<a href="' + mapsUrl + '" target="_blank" style="color:#38bdf8;font-family:Poppins,sans-serif;font-size:14px;">🔗 Open in Google Maps</a>';
+            }
+        },
+        function() {
+            showHospitalFallback(content);
+        }
+    );
+}
+
+function showHospitalFallback(content) {
+    content.innerHTML =
+        '<p style="color:#fbbf24;font-family:Poppins,sans-serif;font-size:14px;margin-bottom:12px;">📍 Location access denied or unavailable.</p>' +
+        '<p style="color:#93c5fd;font-family:Poppins,sans-serif;font-size:13px;margin-bottom:10px;">Enter your address to find nearby hospitals:</p>' +
+        '<input id="manualAddress" type="text" placeholder="e.g. 123 Main St, New York" style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(100,180,255,0.3);background:rgba(10,30,80,0.7);color:#bfdbfe;font-family:Poppins,sans-serif;font-size:13px;margin-bottom:10px;">' +
+        '<button onclick="searchManualAddress()" style="background:linear-gradient(135deg,#1d4ed8,#0ea5e9);color:#fff;border:none;padding:9px 20px;border-radius:20px;cursor:pointer;font-family:Poppins,sans-serif;font-size:13px;">Search</button>' +
+        '<div id="manualMapResult" style="margin-top:14px;"></div>';
+}
+
+function searchManualAddress() {
+    var addr = document.getElementById("manualAddress").value.trim();
+    if (!addr) return;
+    var result = document.getElementById("manualMapResult");
+    if (MAPS_API_KEY) {
+        var src = "https://www.google.com/maps/embed/v1/search?key=" + MAPS_API_KEY +
+            "&q=hospitals+near+" + encodeURIComponent(addr);
+        result.innerHTML = '<iframe width="100%" height="340" style="border:0;border-radius:10px;" loading="lazy" allowfullscreen src="' + src + '"></iframe>';
+    } else {
+        var url = "https://www.google.com/maps/search/hospitals+near+" + encodeURIComponent(addr);
+        result.innerHTML = '<a href="' + url + '" target="_blank" style="color:#38bdf8;font-family:Poppins,sans-serif;font-size:14px;">🔗 Search hospitals near ' + addr + ' on Google Maps</a>';
+    }
+}
+
+function closeHospitalModal() {
+    document.getElementById("hospitalModal").style.display = "none";
+}
+</script>
+
+<style>
+@media print {
+    .navbar, .result-actions, footer { display: none !important; }
+    body { background: white !important; color: black !important; }
+    .rx-card {
+        box-shadow: none !important;
+        border: 2px solid #333 !important;
+        background: white !important;
+        color: black !important;
+    }
+    .rx-diagnosis-name { color: #1a237e !important; }
+    .rx-tag { background: #e3f2fd !important; color: #1a237e !important; border-color: #90caf9 !important; }
+    .rx-medicine-box { background: #f3e5f5 !important; }
+    .rx-symbol { color: #1a237e !important; }
+    .rx-conf-bar-fill { background: #1a237e !important; }
+}
+
+/* Severity badges */
+.sev-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 1px 6px;
+    border-radius: 999px;
+    margin-left: 5px;
+    vertical-align: middle;
+    text-transform: capitalize;
+    letter-spacing: 0.03em;
+}
+.sev-mild     { background: #1565c0; color: #fff; }
+.sev-moderate { background: #f59e0b; color: #fff; }
+.sev-severe   { background: #dc2626; color: #fff; }
+
+/* Compare button */
+.compare-btn {
+    background: rgba(251,191,36,0.15);
+    border: 1px solid rgba(251,191,36,0.4);
+    color: #fbbf24;
+    border-radius: 12px;
+    padding: 3px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    font-family: Poppins, sans-serif;
+    margin-left: 8px;
+    transition: background 0.2s;
+}
+.compare-btn:hover { background: rgba(251,191,36,0.28); }
+
+/* Diff highlight */
+.diff-highlight {
+    background: rgba(251,191,36,0.1);
+    border-left: 3px solid #fbbf24;
+    color: #fde68a;
+}
+
+/* Compare panel */
+#comparePanel {
+    margin: 24px auto;
+    max-width: 900px;
+    background: rgba(10,30,80,0.7);
+    border: 1px solid rgba(100,180,255,0.3);
+    border-radius: 14px;
+    padding: 20px 24px;
+    color: #dbeafe;
+}
+
+/* Hospital modal overlay */
+#hospitalModal {
+    backdrop-filter: blur(4px);
+}
+</style>
+
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Contact Us</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+    <script>
+        (function() {
+            var t = localStorage.getItem("theme") || "dark";
+            document.documentElement.setAttribute("data-theme", t);
+        })();
+    </script>
+</head>
+<body class="page-contact">
+
+<nav class="navbar">
+    <span class="navbar-brand">🩺 AI Disease Prediction</span>
+    <div class="navbar-links">
+        <a href="/" class="nav-link">🏠 Home</a>
+        <a href="/symptoms" class="nav-link">🔬 Symptoms</a>
+        <a href="/logout" class="nav-link danger">Logout</a>
+        <button id="themeToggle" class="theme-toggle-btn" title="Toggle theme">🌙</button>
+    </div>
+</nav>
+
+<!-- WRITE TO US BUTTON -->
+<button class="write-to-us-btn" onclick="openFeedback()">
+    ✍️ Write to Us
+</button>
+
+<!-- FEEDBACK MODAL -->
+<div class="feedback-overlay" id="feedbackOverlay" onclick="closeFeedback(event)">
+    <div class="feedback-modal">
+        <div class="feedback-modal-header">
+            <span>✍️ Send Feedback</span>
+            <button onclick="closeFeedback()" class="feedback-close">✕</button>
+        </div>
+        <form onsubmit="sendFeedback(event)">
+            <div class="form-group">
+                <label class="form-label">Your Name</label>
+                <input type="text" id="fbName" class="glass-input" placeholder="Your name" required>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Message</label>
+                <textarea id="fbMessage" class="glass-input" style="height:110px; resize:vertical;" placeholder="Write your feedback or message..." required></textarea>
+            </div>
+            <button type="submit" class="submit-btn" id="fbSubmitBtn">Send Message 📨</button>
+        </form>
+        <div id="fbSuccess" class="icard-success" style="display:none; margin-top:12px;">
+            ✅ Message sent successfully!
+        </div>
+        <div id="fbError" class="icard-error" style="display:none; margin-top:12px;"></div>
+    </div>
+</div>
+
+<footer><p>AI-based Medical Assistance · For Educational Use Only · <a href="/contact" style="color:rgba(255,255,255,0.6);">Contact Us</a></p></footer>
+
+<script>
+function openFeedback() {
+    document.getElementById("feedbackOverlay").classList.add("active");
+}
+
+function closeFeedback(e) {
+    if (!e || e.target === document.getElementById("feedbackOverlay") || e.currentTarget.classList.contains("feedback-close")) {
+        document.getElementById("feedbackOverlay").classList.remove("active");
+    }
+}
+
+function sendFeedback(e) {
+    e.preventDefault();
+    let name = document.getElementById("fbName").value.trim();
+    let message = document.getElementById("fbMessage").value.trim();
+    let btn = document.getElementById("fbSubmitBtn");
+    btn.disabled = true;
+    btn.textContent = "Sending...";
+
+    fetch("/send_feedback", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: "name=" + encodeURIComponent(name) + "&message=" + encodeURIComponent(message)
+    })
+    .then(r => r.json())
+    .then(data => {
+        btn.disabled = false;
+        btn.textContent = "Send Message 📨";
+        if (data.success) {
+            document.getElementById("fbSuccess").style.display = "block";
+            document.getElementById("fbError").style.display = "none";
+            e.target.reset();
+            setTimeout(() => {
+                document.getElementById("fbSuccess").style.display = "none";
+                closeFeedback();
+            }, 3000);
+        } else {
+            document.getElementById("fbError").style.display = "block";
+            document.getElementById("fbError").textContent = "⚠️ " + (data.error || "Failed to send. Try again.");
+        }
+    })
+    .catch(() => {
+        btn.disabled = false;
+        btn.textContent = "Send Message 📨";
+        document.getElementById("fbError").style.display = "block";
+        document.getElementById("fbError").textContent = "⚠️ Network error. Please try again.";
+    });
+}
+</script>
+
+<script>
+(function() {
+    var btn = document.getElementById("themeToggle");
+    function applyTheme(t) {
+        document.documentElement.setAttribute("data-theme", t);
+        document.body.setAttribute("data-theme", t);
+        btn.textContent = t === "light" ? "🌙" : "☀️";
+    }
+    applyTheme(localStorage.getItem("theme") || "dark");
+    btn.addEventListener("click", function() {
+        var next = (localStorage.getItem("theme") || "dark") === "dark" ? "light" : "dark";
+        localStorage.setItem("theme", next);
+        applyTheme(next);
+    });
+})();
+</script>
+</body>
+</html>
