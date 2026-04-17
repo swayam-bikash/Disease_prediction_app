@@ -1,0 +1,30 @@
+# Environment & secrets
+.env
+
+# Database
+users.db
+
+# Feedback
+feedback.txt
+
+# Trained model
+models/model.pkl
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+env/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
